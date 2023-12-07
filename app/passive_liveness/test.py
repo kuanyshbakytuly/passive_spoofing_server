@@ -2,9 +2,9 @@ import os
 import cv2
 import numpy as np
 
-from model import AntiSpoofPredict
+from app.passive_liveness.model import AntiSpoofPredict
 from utils import parse_model_name
-from crop import CropImage
+from app.passive_liveness.crop import CropImage
 
 
 

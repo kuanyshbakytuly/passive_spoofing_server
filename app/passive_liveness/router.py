@@ -7,12 +7,13 @@ import os
 from fastapi import APIRouter, HTTPException
 from loguru import logger
 
-import schemas as schemas
+import app.passive_liveness.schemas as schemas
 
-from model import AntiSpoofPredict
-from utils import parse_model_name
-from crop import CropImage
+from app.passive_liveness.model import AntiSpoofPredict
+from app.passive_liveness.utils import parse_model_name
+from app.passive_liveness.crop import CropImage
 
+from settings import settings
 
 
 router = APIRouter(
@@ -41,10 +42,11 @@ async def passive_liveness(
     image_bbox = model_test.get_bbox(camera_image)
     prediction = np.zeros((1, 3))
 
-    model_dir = "/Users/kuanyshbakytuly/Desktop/Relive/silent_face_api/model_pth/anti_spoofing"
-    
+    model_dir = "anti_spoofing"
+    model_filepath = settings.storage_folder.joinpath(model_dir)
+
     # sum the prediction from single model's result
-    for i, model_name in enumerate(os.listdir(model_dir)):
+    for i, model_name in enumerate(os.listdir(model_filepath)):
         h_input, w_input, model_type, scale = parse_model_name(model_name)
         param = {
             "org_img": camera_image,
@@ -58,7 +60,7 @@ async def passive_liveness(
             param["crop"] = False
 
         face = image_cropper.crop(**param)
-        this_predict = model_test.predict(face, os.path.join(model_dir, model_name))
+        this_predict = model_test.predict(face, os.path.join(model_filepath, model_name))
         prediction += this_predict
 
 

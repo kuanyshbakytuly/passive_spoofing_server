@@ -3,3 +3,6 @@ opencv-python
 torchvision
 fastapi
 loguru
+httpx
+uvicorn
+pydantic-settings

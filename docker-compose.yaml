@@ -1,0 +1,44 @@
+x-env_params: &env_params
+  STORAGE_DIR: &STORAGE_DIR /storage
+  PROJECT_DIR: &PROJECT_DIR /project
+  SERVER_HOST: &SERVER_HOST passive_liveness_server
+  TZ: Asia/Almaty
+
+x-service: &service
+  build: .
+  volumes:
+    - { type: bind, source: "${PROJECT_DIR}", target: *PROJECT_DIR }
+    - { type: bind, source: "${STORAGE_DIR}", target: *STORAGE_DIR }
+    - { type: bind, source: "./logging.ini", target: "/logging.ini" }
+  shm_size: "12gb"
+  environment:
+    <<: *env_params
+  networks:
+    - relive
+
+
+services:
+  server:
+    <<: *service
+    hostname: *SERVER_HOST
+    command: >-
+      bash -c "
+      uvicorn app.app:app
+      --log-config /logging.ini
+      --log-level debug
+      --workers 1
+      --host 0.0.0.0 
+      --port 8003
+      "
+    #      --root-path /main
+    #      "
+    networks:
+      - relive
+    ports:
+      - "${SERVER_PORT}:8003"
+    restart: unless-stopped
+
+
+networks:
+  relive:
+    name: relive

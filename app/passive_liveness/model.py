@@ -5,8 +5,9 @@ import torch
 import numpy as np
 import torch.nn.functional as F
 
-from utils import MiniFASNetV1SE, MiniFASNetV2, get_kernel, parse_model_name
+from app.passive_liveness.utils import MiniFASNetV1SE, MiniFASNetV2, get_kernel, parse_model_name
 from torchvision import transforms
+from settings import settings
 
 MODEL_MAPPING = {
     'MiniFASNetV2': MiniFASNetV2,
@@ -15,10 +16,19 @@ MODEL_MAPPING = {
 
 class Detection:
     def __init__(self):
-        path_to_folder = '/Users/kuanyshbakytuly/Desktop/Relive/silent_face_api/model_pth/face_detection'
-        caffemodel = f"{path_to_folder}/Widerface-RetinaFace.caffemodel"
-        deploy = f"{path_to_folder}/deploy.prototxt"
-        self.detector = cv2.dnn.readNetFromCaffe(deploy, caffemodel)
+        
+        
+        #caffemodel = f"/face_detector/Widerface-RetinaFace.caffemodel"
+        #deploy = f"/face_detector/deploy.prototxt"
+
+        #caffemodel_filepath = settings.storage_folder.joinpath(caffemodel)
+        #deploy_filepath = settings.storage_folder.joinpath(deploy)
+
+        deploy_filepath = 'app/storage/face_detector/deploy.prototxt'
+        caffemodel_filepath = 'app/storage/face_detector/Widerface-RetinaFace.caffemodel'
+        
+
+        self.detector = cv2.dnn.readNetFromCaffe(deploy_filepath, caffemodel_filepath)
         self.detector_confidence = 0.6
 
     def get_bbox(self, img):
