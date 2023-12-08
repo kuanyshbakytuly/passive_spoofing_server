@@ -3,9 +3,6 @@ import torch.nn.functional as F
 from torch.nn import Linear, Conv2d, BatchNorm1d, BatchNorm2d, PReLU, ReLU, Sigmoid, \
     AdaptiveAvgPool2d, Sequential, Module
 
-from datetime import datetime
-import os
-
 
 def get_kernel(height, width):
     kernel_size = ((height + 15) // 16, (width + 15) // 16)
@@ -22,11 +19,6 @@ def parse_model_name(model_name):
     else:
         scale = float(info[0])
     return int(h_input), int(w_input), model_type, scale
-
-
-def make_if_not_exist(folder_path):
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
 
 class L2Norm(Module):
     def forward(self, input):

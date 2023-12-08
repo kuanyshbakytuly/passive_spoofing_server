@@ -3,14 +3,12 @@ import base64
 
 import cv2
 import numpy as np
-import os
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from loguru import logger
 
 import app.passive_liveness.schemas as schemas
 
 from app.passive_liveness.model import AntiSpoofPredict
-from app.passive_liveness.utils import parse_model_name
 from app.passive_liveness.crop import CropImage
 
 from settings import settings
@@ -21,12 +19,26 @@ router = APIRouter(
     tags=['passive_liveness'],
 )
 
+path_to_caffemodel = settings.storage_folder.joinpath('detection_model/Widerface-RetinaFace.caffemodel')
+path_to_deploy = settings.storage_folder.joinpath('detection_model/deploy.prototxt')
+
+path_to_MiniFASNetV2 = settings.storage_folder.joinpath('anti_spoofing/2.7_80x80_MiniFASNetV2.pth')
+path_to_MiniFASNetV1SE = settings.storage_folder.joinpath('anti_spoofing/4_0_0_80x80_MiniFASNetV1SE.pth')
+
+model = AntiSpoofPredict(0, (path_to_deploy, path_to_caffemodel), (path_to_MiniFASNetV2, path_to_MiniFASNetV1SE))
+
+MiniFASNetV2 = model.MiniFASNetV2
+MiniFASNetV1SE = model.MiniFASNetV1SE
+
+MiniFASNetV2_params = model.MiniFASNetV2_params
+MiniFASNetV1SE_params = model.MiniFASNetV1SE_params
+
+image_cropper = CropImage()
 
 @router.post(
     "/verify",
     response_model = schemas.FaceLivenessOutput
 )
-
 async def passive_liveness(
         face_liveness_input: schemas.FaceLivenessInput,
 ):
@@ -37,33 +49,22 @@ async def passive_liveness(
         cv2.COLOR_BGR2RGB,
     )
 
-    model_test = AntiSpoofPredict(0)
-    image_cropper = CropImage()
-    image_bbox = model_test.get_bbox(camera_image)
+    image_bbox = model.get_bbox(camera_image)
     prediction = np.zeros((1, 3))
 
-    model_dir = "anti_spoofing"
-    model_filepath = settings.storage_folder.joinpath(model_dir)
+    MiniFASNetV2_params["org_img"] = camera_image
+    MiniFASNetV2_params["bbox"] = image_bbox
 
-    # sum the prediction from single model's result
-    for i, model_name in enumerate(os.listdir(model_filepath)):
-        h_input, w_input, model_type, scale = parse_model_name(model_name)
-        param = {
-            "org_img": camera_image,
-            "bbox": image_bbox,
-            "scale": scale,
-            "out_w": w_input,
-            "out_h": h_input,
-            "crop": True,
-        }
-        if scale is None:
-            param["crop"] = False
+    MiniFASNetV1SE_params["org_img"] = camera_image
+    MiniFASNetV1SE_params["bbox"] = image_bbox
 
-        face = image_cropper.crop(**param)
-        this_predict = model_test.predict(face, os.path.join(model_filepath, model_name))
-        prediction += this_predict
+    face_for_MiniFASNetV2 = image_cropper.crop(**MiniFASNetV2_params)
+    face_for_MiniFASNetV1SE = image_cropper.crop(**MiniFASNetV1SE_params)
 
+    prediction_of_MiniFASNetV2 = model.predict(MiniFASNetV2, face_for_MiniFASNetV2)
+    prediction_of_MiniFASNetV1SE = model.predict(MiniFASNetV1SE, face_for_MiniFASNetV1SE)
 
+    prediction = prediction_of_MiniFASNetV2 + prediction_of_MiniFASNetV1SE
     label = np.argmax(prediction)
 
     if label == 1:
