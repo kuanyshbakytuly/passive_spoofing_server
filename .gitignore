@@ -1,3 +1,2 @@
 .env
-images/
-model_pth/
+app/passive_liveness/test.py
