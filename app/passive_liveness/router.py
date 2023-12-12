@@ -58,11 +58,9 @@ async def passive_liveness(
     MiniFASNetV1SE_params["org_img"] = camera_image
     MiniFASNetV1SE_params["bbox"] = image_bbox
 
-    print(MiniFASNetV1SE_params)
 
     face_for_MiniFASNetV2 = image_cropper.crop(**MiniFASNetV2_params)
     face_for_MiniFASNetV1SE = image_cropper.crop(**MiniFASNetV1SE_params)
-    cv2.imwrite('face_for_MiniFASNetV2.jpg', face_for_MiniFASNetV2)
 
     prediction_of_MiniFASNetV2 = model.predict(MiniFASNetV2, face_for_MiniFASNetV2)
     prediction_of_MiniFASNetV1SE = model.predict(MiniFASNetV1SE, face_for_MiniFASNetV1SE)
