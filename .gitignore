@@ -1,2 +1,3 @@
 .env
 app/passive_liveness/test.py
+__pycache__
