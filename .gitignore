@@ -3,4 +3,8 @@ venv
 env
 .idea
 app/passive_liveness/test.py
+<<<<<<< HEAD
 __pycache__
+=======
+__pycache__
+>>>>>>> e1551570971fd5e993e67475727c89bb546960a5

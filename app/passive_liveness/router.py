@@ -58,6 +58,7 @@ async def passive_liveness(
     MiniFASNetV1SE_params["org_img"] = camera_image
     MiniFASNetV1SE_params["bbox"] = image_bbox
 
+
     face_for_MiniFASNetV2 = image_cropper.crop(**MiniFASNetV2_params)
     face_for_MiniFASNetV1SE = image_cropper.crop(**MiniFASNetV1SE_params)
 
@@ -72,7 +73,7 @@ async def passive_liveness(
     else:
         status = schemas.FaceLivenessStatus.false
 
-    logger.info(f'status is {status}')
+    logger.info(f'status is {prediction}')
     return schemas.FaceLivenessOutput(status=status)
 
 

@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 from app.passive_liveness.utils import MiniFASNetV1SE, MiniFASNetV2, get_kernel, parse_model_name
 from torchvision import transforms
-from app.passive_liveness.utils import parse_model_name
+from app.passive_liveness.utils import parse_model_name, Compose, ToTensor
 
 MODEL_MAPPING = {
     'MiniFASNetV2': MiniFASNetV2,
@@ -85,8 +85,10 @@ class AntiSpoofPredict(Detection):
 
 
     def predict(self, model, img):
-        to_tensor = transforms.ToTensor()
-        img = to_tensor(img)
+        test_transform = Compose([
+            ToTensor(),
+        ])
+        img = test_transform(img)
         img = img.unsqueeze(0).to(self.device)
         model.eval()
         with torch.no_grad():
