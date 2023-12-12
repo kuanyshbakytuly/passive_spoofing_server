@@ -77,7 +77,7 @@ async def passive_liveness(
 
 
 async def main():
-    camera_image_path = 'images/photo_2023-12-06 18.55.23.jpeg'
+    camera_image_path = 'images.jpeg'
 
     camera_image: np.ndarray = cv2.imread(camera_image_path)
     image_bytes = cv2.imencode('.jpg', camera_image)[1].tobytes()
