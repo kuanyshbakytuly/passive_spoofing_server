@@ -44,10 +44,13 @@ async def passive_liveness(
 ):
     camera_image_b64: str = face_liveness_input.camera_image_b64
 
-    camera_image: np.ndarray = cv2.cvtColor(
-        cv2.imdecode(np.frombuffer(base64.b64decode(camera_image_b64), np.uint8), cv2.IMREAD_COLOR),
-        cv2.COLOR_BGR2RGB,
-    )
+    # camera_image: np.ndarray = cv2.cvtColor(
+    #     cv2.imdecode(np.frombuffer(base64.b64decode(camera_image_b64), np.uint8), cv2.IMREAD_COLOR),
+    #     cv2.COLOR_BGR2RGB,
+    # )
+    # read by bgr color only
+    camera_image: np.ndarray = cv2.imdecode(np.frombuffer(base64.b64decode(camera_image_b64), np.uint8),
+                                            cv2.IMREAD_COLOR)
 
     image_bbox = model.get_bbox(camera_image)
     prediction = np.zeros((1, 3))
