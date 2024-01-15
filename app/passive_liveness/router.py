@@ -3,7 +3,8 @@ import base64
 
 import cv2
 import numpy as np
-from fastapi import APIRouter
+from typing import Annotated
+from fastapi import APIRouter, File
 from loguru import logger
 
 import app.passive_liveness.schemas as schemas
@@ -40,16 +41,12 @@ image_cropper = CropImage()
     response_model = schemas.FaceLivenessOutput
 )
 async def passive_liveness(
-        face_liveness_input: schemas.FaceLivenessInput,
+        # face_liveness_input: schemas.FaceLivenessInput,
+        image: Annotated[bytes, File()],
 ):
-    camera_image_b64: str = face_liveness_input.camera_image_b64
+    # camera_image_b64: str = face_liveness_input.camera_image_b64
 
-    # camera_image: np.ndarray = cv2.cvtColor(
-    #     cv2.imdecode(np.frombuffer(base64.b64decode(camera_image_b64), np.uint8), cv2.IMREAD_COLOR),
-    #     cv2.COLOR_BGR2RGB,
-    # )
-    # read by bgr color only
-    camera_image: np.ndarray = cv2.imdecode(np.frombuffer(base64.b64decode(camera_image_b64), np.uint8),
+    camera_image: np.ndarray = cv2.imdecode(np.frombuffer(image, np.uint8),
                                             cv2.IMREAD_COLOR)
 
     image_bbox = model.get_bbox(camera_image)
